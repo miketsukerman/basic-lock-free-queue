@@ -1,0 +1,43 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "desktop",
+            "displayName": "Desktop configure preset",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++-14",
+                "CMAKE_C_COMPILER": "gcc-14",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "desktop",
+            "description": "Desktop build preset",
+            "displayName": "",
+            "configurePreset": "desktop"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "desktop",
+            "description": "",
+            "displayName": "",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "desktop"
+                },
+                {
+                    "type": "build",
+                    "name": "desktop"
+                }
+            ]
+        }
+    ]
+}
