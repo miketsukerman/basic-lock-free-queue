@@ -48,7 +48,7 @@ using Index = int64_t;
 /**
  * @brief Lock free queue implemented using array as a container.
  * 
- * Implementation uses two indexes front and rear (f & r).  
+ * Implementation uses two indexes pop and push (f & r).  
  */
 template <typename T, Index N>
 class Queue {
@@ -57,17 +57,23 @@ class Queue {
 
 public: 
 
-    Queue() : f{-1},r{-1} {}
+    Queue() : _arr{},f{-1},r{-1} {}
     ~Queue() = default;
 
-    Queue(Queue &) = delete;
-    Queue(Queue &&) = delete;
+    /**
+     * @brief adds element of type T to the queue
+     */
+    void push(const T & t) {
 
-    void push(T t) {
-
-        if(r == N-1) {
+        // r (push index) reached the end of the array
+        if(r == size() - 1) {
             std::println("queue::push() is full");
             
+            // if f (pop index) is not zero 
+            // meaning that we removed some 
+            // elements from the queue
+            // then reset push index r to the
+            // beginning of the array
             if(f > 0) {
                 r = -1;
             }
@@ -75,83 +81,135 @@ public:
             return;
         }
 
+        // if both push and pop indexes are -1 
+        // means queue is empty
         if(f == -1 && r == -1) {
             f = 0;
             r = 0;
         } else {
-            r++;
+            // otherwise increment push index
+            ++r;
         }
 
-        _queue[r] = t;
+        // copy element to the array 
+        _arr[r] = t;
 
         std::println("queue::push({}) front={}, rear={}",t , f.load(), r.load());
     }
 
+    /**
+     * @brief pops element of type T from the queue
+     * 
+     * @return 
+     * - std::optional<T> if queue is not empty
+     * - std::nullopt if queue is empty
+     */
     std::optional<T> pop() {
 
+        // if pop index f is -1 means queue is empty
         if(f == -1) {
             std::println("queue::pop() queue is empty");
+
+            // if queue is empty we return std::nullopt
             return std::nullopt;
         }
 
-        if(f == N-1) {
+        // picking up element at position f
+        auto elem = _arr[f];
+
+        // if we reached the end of the array 
+        // reset pop index f to -1 (pre beginning position)
+        if(f == size() - 1) {
             f = -1;
         } 
 
-        auto elem = _queue[f];
-
+        // if pop index is equal to push index (r == f) 
+        // it means there are no elements in the queue
         if(f == r) {
-            f = -1;
-            r = -1;
+            std::println("queue::pop() queue is empty");
+            return std::nullopt;
         } else {
-            f++;
+            // otherwise we increment pop index f
+            ++f;
         }
 
         std::println("queue::pop({}) front={}, rear={}",elem , f.load(), r.load());
             
+        // returning element
         return std::make_optional(elem);
     }
 
+    /**
+     * @brief checks if queue is full
+     * 
+     * @returns 
+     * - true if queue container is full
+     * - false if there is a space for new elements
+     */
     bool is_full() {
-        return (r == N - 1 && f == -1);
+        return (r == size() - 1 && f == -1);
     }
 
-    bool is_empty() {
+    /**
+     * @brief checks if queue is empty
+     * 
+     * @returns 
+     * - true if queue container is empty
+     * - false if there are some elements 
+     */
+    [[nodiscard]] bool is_empty() const {
         return (f == -1 && r == -1);
     }
 
-    Index size() {
-        return _queue.size();
+    /**
+     * @brief Returns size of the queue container
+     */
+    constexpr Index size() {
+        return _arr.size();
     }
 
 private: 
-    std::array<T,N> _queue;
+    std::array<T,N> _arr;
 
     AtomicIndex f;
     AtomicIndex r;
 
 };
 
-auto main() -> int 
+auto main() -> int
 {
     constexpr Index size{100};
 
     Queue<int, size> queue;
 
+    /**
+    * this is a single producer thread 
+    * pushing some arbitrary integers to 
+    * the queue
+    */
     std::jthread producer([&]() {
         std::println("Producer thread started");
 
         for(int i = 0; i < 1000000; i++) {
+            // sleep added to slow down the production
             std::this_thread::sleep_for(50ms);
             queue.push(pow(i,2));
         }
     });
 
+    
+    /**
+     * Pool of consumer threads 
+     */
     constexpr auto Consumers = 4;
     std::vector<std::jthread> consumers;
+    
+    /**
+     * creating consumer threads in a loop
+     */
     for(auto i = 0; i < Consumers; i++) {
 
-        consumers.push_back(std::jthread([&]() {
+        consumers.emplace_back([&]() {
             size_t ci = i;
             std::println("Consumer{} thread started",ci);
 
@@ -167,7 +225,7 @@ auto main() -> int
                 std::this_thread::sleep_for(200ms);
                 std::println("Consumer{}: element {} from queue.",ci, *e);
             }
-        }));
+        });
     }
 
     return 0;
