@@ -1,5 +1,6 @@
 out
 *.o
 build
+.idea
 .vscode
 cmake-build*
