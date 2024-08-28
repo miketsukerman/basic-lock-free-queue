@@ -11,9 +11,12 @@ if(ENABLE_TESTS)
 CPMAddPackage("gh:catchorg/Catch2@3.7.0")
 endif()
 
+CPMAddPackage("gh:gabime/spdlog@1.7.0")
+
 add_library(queue INTERFACE)
 target_include_directories(queue INTERFACE ${CMAKE_SOURCE_DIR}/include)
 target_compile_features(queue INTERFACE cxx_std_23)
+target_link_libraries(queue INTERFACE spdlog)
 
 # example usage
 add_executable(solution src/main.cpp)

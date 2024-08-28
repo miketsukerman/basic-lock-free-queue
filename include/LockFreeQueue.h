@@ -39,6 +39,8 @@ Adapted the queue to handle multiple consumers and a single producer.
 #include <chrono>
 #include <print>
 
+#include <spdlog/spdlog.h>
+
 using namespace std::chrono;
 
 using Index = int64_t;
@@ -68,7 +70,7 @@ public:
 
         // r (push index) reached the end of the array
         if(r == size() - 1) {
-            std::println("queue::push() is full");
+            spdlog::trace("queue::push() is full");
 
             // if f (pop index) is not zero
             // meaning that we removed some
@@ -95,7 +97,7 @@ public:
         // copy element to the array
         _arr[r] = t;
 
-        std::println("queue::push({}) front={}, rear={}",t , f.load(), r.load());
+        spdlog::trace("queue::push({}) front={}, rear={}",t , f.load(), r.load());
 
         return true;
     }
@@ -111,7 +113,7 @@ public:
 
         // if pop index f is -1 means queue is empty
         if(f == -1) {
-            std::println("queue::pop() queue is empty");
+            spdlog::trace("queue::pop() queue is empty");
 
             // if queue is empty we return std::nullopt
             return std::nullopt;
@@ -127,14 +129,14 @@ public:
         } else if(f == r) {
             // if pop index is equal to push index (r == f)
             // it means there are no elements in the queue
-            std::println("queue::pop() queue is empty");
+            spdlog::trace("queue::pop() queue is empty");
             return std::nullopt;
         } else {
             // otherwise we increment pop index f
             ++f;
         }
 
-        std::println("queue::pop({}) front={}, rear={}",elem , f.load(), r.load());
+        spdlog::trace("queue::pop({}) front={}, rear={}",elem , f.load(), r.load());
 
         // returning element
         return std::make_optional(elem);

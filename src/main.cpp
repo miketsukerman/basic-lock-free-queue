@@ -4,6 +4,9 @@
 
 auto main() -> int
 {
+    spdlog::set_pattern("[th %t] %v");
+    spdlog::set_level(spdlog::level::trace);
+
     constexpr Index size{20};
 
     Queue<int, size> queue;
@@ -14,7 +17,7 @@ auto main() -> int
     * the queue
     */
     std::jthread producer([&]() {
-        std::println("Producer thread started");
+        spdlog::trace("Producer thread started");
 
         for(int i = 0; i < 1000000; i++) {
             // sleep added to slow down the production
@@ -37,19 +40,19 @@ auto main() -> int
 
         consumers.emplace_back([&]() {
             size_t ci = i;
-            std::println("Consumer{} thread started",ci);
+            spdlog::trace("Consumer{} thread started",ci);
 
             while(true) {
                 auto e = queue.pop();
 
                 if(!e.has_value()) {
-                    std::println("Consumer{}: queue is empty",ci);
+                    spdlog::trace("Consumer{}: queue is empty",ci);
                     std::this_thread::sleep_for(200ms);
                     continue;
                 }
 
                 std::this_thread::sleep_for(200ms);
-                std::println("Consumer{}: element {} from queue.",ci, *e);
+                spdlog::trace("Consumer{}: element {} from queue.",ci, *e);
             }
         });
     }

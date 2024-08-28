@@ -4,6 +4,9 @@
 
 TEST_CASE("Using lock free queue from one thread","[single-threaded]") {
 
+    spdlog::set_pattern("[th %t] %v");
+    spdlog::set_level(spdlog::level::trace);
+
     constexpr Index size{10};
 
     std::array<int,size> tmp{0,1,2,3,4,5,6,7,8,9};
