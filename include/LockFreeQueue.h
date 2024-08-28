@@ -70,7 +70,7 @@ public:
 
         // r (push index) reached the end of the array
         if(r == size() - 1) {
-            spdlog::trace("queue::push() is full");
+            spdlog::trace("queue::push(): queue is full");
 
             // if f (pop index) is not zero
             // meaning that we removed some
@@ -113,7 +113,7 @@ public:
 
         // if pop index f is -1 means queue is empty
         if(f == -1) {
-            spdlog::trace("queue::pop() queue is empty");
+            spdlog::trace("queue::pop(): queue is empty");
 
             // if queue is empty we return std::nullopt
             return std::nullopt;
