@@ -28,7 +28,8 @@ target_link_libraries(solution PUBLIC queue)
 if(ENABLE_TESTS)
 add_executable(tests
         test/single_threaded.cpp
-        )
+        test/multi_threaded.cpp
+)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain queue)
 
 

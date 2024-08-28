@@ -19,7 +19,8 @@ TEST_CASE("Using lock free queue from one thread","[single-threaded]") {
             REQUIRE(r == true);
         }
 
-        REQUIRE(q.size() == size);
+        REQUIRE(q.capacity() == size);
+        REQUIRE(q.capacity() == size);
         REQUIRE(q.is_empty() == false);
         REQUIRE(q.is_full() == true);
 
