@@ -37,7 +37,6 @@ Adapted the queue to handle multiple consumers and a single producer.
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include <print>
 
 #include <spdlog/spdlog.h>
 
